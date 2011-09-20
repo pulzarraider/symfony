@@ -31,35 +31,47 @@ class CookieJar
      */
     public function set(Cookie $cookie)
     {
-        $this->cookieJar[$cookie->getName()] = $cookie;
+        $this->cookieJar[$cookie->getDomain()][$cookie->getPath()][$cookie->getName()] = $cookie;
     }
 
     /**
      * Gets a cookie by name.
      *
      * @param string $name The cookie name
+     * @param string $path
+     * @param string $domain
      *
      * @return Cookie|null A Cookie instance or null if the cookie does not exist
      *
      * @api
      */
-    public function get($name)
+    public function get($name, $path = '/', $domain = '')
     {
         $this->flushExpiredCookies();
 
-        return isset($this->cookieJar[$name]) ? $this->cookieJar[$name] : null;
+        return isset($this->cookieJar[$domain][$path][$name]) ? $this->cookieJar[$domain][$path][$name] : null;
     }
 
     /**
      * Removes a cookie by name.
      *
      * @param string $name The cookie name
+     * @param string $path
+     * @param string $domain
      *
      * @api
      */
-    public function expire($name)
+    public function expire($name, $path = '/', $domain = '')
     {
-        unset($this->cookieJar[$name]);
+        unset($this->cookieJar[$domain][$path][$name]);
+
+        if (empty($this->cookieJar[$domain][$path])) {
+            unset($this->cookieJar[$domain][$path]);
+
+            if (empty($this->cookieJar[$domain])) {
+                unset($this->cookieJar[$domain]);
+            }
+        }
     }
 
     /**
@@ -94,7 +106,16 @@ class CookieJar
     {
         $this->flushExpiredCookies();
 
-        return $this->cookieJar;
+        $flattenedCookies = array();
+        foreach ($this->cookieJar as $path) {
+            foreach ($path as $cookies) {
+                foreach ($cookies as $cookie) {
+                    $flattenedCookies[] = $cookie;
+                }
+            }
+        }
+
+        return $flattenedCookies;
     }
 
     /**
@@ -112,23 +133,27 @@ class CookieJar
         $parts = array_replace(array('path' => '/'), parse_url($uri));
 
         $cookies = array();
-        foreach ($this->cookieJar as $cookie) {
-            if ($cookie->getDomain()) {
-                $domain = ltrim($cookie->getDomain(), '.');
+        foreach ($this->cookieJar as $domain => $allCookies) {
+            if ($domain) {
+                $domain = ltrim($domain, '.');
                 if ($domain != substr($parts['host'], -strlen($domain))) {
                     continue;
                 }
             }
 
-            if ($cookie->getPath() != substr($parts['path'], 0, strlen($cookie->getPath()))) {
-                continue;
-            }
+            foreach ($allCookies as $path => $cookies) {
+                if ($path != substr($parts['path'], 0, strlen($path))) {
+                    continue;
+                }
 
-            if ($cookie->isSecure() && 'https' != $parts['scheme']) {
-                continue;
-            }
+                foreach ($cookies as $name => $cookie) {
+                    if ($cookie->isSecure() && 'https' != $parts['scheme']) {
+                        continue;
+                    }
 
-            $cookies[$cookie->getName()] = $returnsRawValue ? $cookie->getRawValue() : $cookie->getValue();
+                    $cookies[$cookie->getName()] = $returnsRawValue ? $cookie->getRawValue() : $cookie->getValue();
+                }
+            }
         }
 
         return $cookies;
@@ -151,10 +176,13 @@ class CookieJar
      */
     public function flushExpiredCookies()
     {
-        $cookies = $this->cookieJar;
-        foreach ($cookies as $name => $cookie) {
-            if ($cookie->isExpired()) {
-                unset($this->cookieJar[$name]);
+        foreach ($this->cookieJar as $domain => $allCookies) {
+            foreach ($allCookies as $path => $cookies) {
+                foreach ($cookies as $name => $cookie) {
+                    if ($cookie->isExpired()) {
+                        unset($this->cookieJar[$domain][$path][$name]);
+                    }
+                }
             }
         }
     }
