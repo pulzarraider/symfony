@@ -102,9 +102,6 @@ class RedisProfilerStorage implements ProfilerStorageInterface
      */
     public function purge()
     {
-        //dangerous:
-        //$this->getRedis()->flushDB();
-
         //delete only items from index
         $indexName = $this->getIndexName();
 
