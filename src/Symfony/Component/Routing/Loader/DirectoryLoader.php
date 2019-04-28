@@ -12,6 +12,7 @@
 namespace Symfony\Component\Routing\Loader;
 
 use Symfony\Component\Config\Loader\FileLoader;
+use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Config\Resource\DirectoryResource;
 use Symfony\Component\Routing\RouteCollection;
 
@@ -38,7 +39,7 @@ class DirectoryLoader extends FileLoader
                     $subType = 'directory';
                 }
 
-                $subCollection = $this->import($subPath, $subType, false, $path);
+                $subCollection = $this->import($subPath, $subType, LoaderInterface::ERROR_LEVEL_ALL, $path);
                 $collection->addCollection($subCollection);
             }
         }

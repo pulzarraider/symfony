@@ -19,6 +19,27 @@ namespace Symfony\Component\Config\Loader;
 interface LoaderInterface
 {
     /**
+     * Ignore all errors.
+     */
+    const ERROR_LEVEL_IGNORE_ALL = 0;
+
+    /**
+     * Basic error level.
+     */
+    const ERROR_LEVEL_BASIC = 1;
+
+    /**
+     * Occurs if file was not found.
+     */
+    const ERROR_LEVEL_FILE_NOT_FOUND = 2;
+
+    /**
+     * Throws exceptions if any error occurs.
+     * The value of this constant will change in the future because it contains the sum of all error levels.
+     */
+    const ERROR_LEVEL_ALL = 3;
+
+    /**
      * Loads a resource.
      *
      * @param mixed       $resource The resource

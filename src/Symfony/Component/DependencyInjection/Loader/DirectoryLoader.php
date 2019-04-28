@@ -11,6 +11,8 @@
 
 namespace Symfony\Component\DependencyInjection\Loader;
 
+use Symfony\Component\Config\Loader\LoaderInterface;
+
 /**
  * DirectoryLoader is a recursive loader to go through directories.
  *
@@ -35,7 +37,7 @@ class DirectoryLoader extends FileLoader
 
                 $this->setCurrentDir($path);
 
-                $this->import($dir, null, false, $path);
+                $this->import($dir, null, LoaderInterface::ERROR_LEVEL_ALL, $path);
             }
         }
     }

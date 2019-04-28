@@ -13,6 +13,7 @@ namespace Symfony\Component\Routing\Tests\Loader;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Config\Resource\GlobResource;
 use Symfony\Component\Routing\Loader\GlobFileLoader;
 use Symfony\Component\Routing\RouteCollection;
@@ -38,7 +39,7 @@ class GlobFileLoaderTest extends TestCase
 
 class GlobFileLoaderWithoutImport extends GlobFileLoader
 {
-    public function import($resource, $type = null, $ignoreErrors = false, $sourceResource = null)
+    public function import($resource, $type = null, $errorLevel = LoaderInterface::ERROR_LEVEL_ALL, $sourceResource = null)
     {
         return new RouteCollection();
     }

@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\DependencyInjection\Loader;
 
+use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\Argument\ArgumentInterface;
 use Symfony\Component\DependencyInjection\Argument\BoundArgument;
@@ -189,7 +190,15 @@ class YamlFileLoader extends FileLoader
             }
 
             $this->setCurrentDir($defaultDirectory);
-            $this->import($import['resource'], isset($import['type']) ? $import['type'] : null, isset($import['ignore_errors']) ? (bool) $import['ignore_errors'] : false, $file);
+
+            $errorLevel = LoaderInterface::ERROR_LEVEL_ALL;
+            if (isset($import['ignore_errors']) && true === (bool) $import['ignore_errors']) {
+                $errorLevel = LoaderInterface::ERROR_LEVEL_IGNORE_ALL;
+            } elseif (isset($import['ignore_not_found']) && true === (bool) $import['ignore_not_found']) {
+                $errorLevel = $errorLevel & ~LoaderInterface::ERROR_LEVEL_FILE_NOT_FOUND;
+            }
+
+            $this->import($import['resource'], isset($import['type']) ? $import['type'] : null, $errorLevel, $file);
         }
     }
 

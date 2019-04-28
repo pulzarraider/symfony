@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\Argument\IteratorArgument;
 use Symfony\Component\DependencyInjection\Argument\ServiceLocatorArgument;
 use Symfony\Component\DependencyInjection\Argument\TaggedIteratorArgument;
@@ -60,10 +61,10 @@ class ContainerConfigurator extends AbstractConfigurator
         $this->container->loadFromExtension($namespace, static::processValue($config));
     }
 
-    final public function import(string $resource, string $type = null, bool $ignoreErrors = false)
+    final public function import(string $resource, string $type = null, int $errorLevel = LoaderInterface::ERROR_LEVEL_ALL)
     {
         $this->loader->setCurrentDir(\dirname($this->path));
-        $this->loader->import($resource, $type, $ignoreErrors, $this->file);
+        $this->loader->import($resource, $type, $errorLevel, $this->file);
     }
 
     final public function parameters(): ParametersConfigurator

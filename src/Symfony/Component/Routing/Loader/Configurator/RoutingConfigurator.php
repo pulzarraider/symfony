@@ -11,6 +11,7 @@
 
 namespace Symfony\Component\Routing\Loader\Configurator;
 
+use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Routing\Loader\PhpFileLoader;
 use Symfony\Component\Routing\RouteCollection;
 
@@ -36,10 +37,10 @@ class RoutingConfigurator
     /**
      * @return ImportConfigurator
      */
-    final public function import($resource, $type = null, $ignoreErrors = false)
+    final public function import($resource, $type = null, $errorLevel = LoaderInterface::ERROR_LEVEL_ALL)
     {
         $this->loader->setCurrentDir(\dirname($this->path));
-        $imported = $this->loader->import($resource, $type, $ignoreErrors, $this->file);
+        $imported = $this->loader->import($resource, $type, $errorLevel, $this->file);
         if (!\is_array($imported)) {
             return new ImportConfigurator($this->collection, $imported);
         }

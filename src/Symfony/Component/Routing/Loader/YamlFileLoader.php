@@ -12,6 +12,7 @@
 namespace Symfony\Component\Routing\Loader;
 
 use Symfony\Component\Config\Loader\FileLoader;
+use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
@@ -187,7 +188,7 @@ class YamlFileLoader extends FileLoader
 
         $this->setCurrentDir(\dirname($path));
 
-        $imported = $this->import($config['resource'], $type, false, $file);
+        $imported = $this->import($config['resource'], $type, LoaderInterface::ERROR_LEVEL_ALL, $file);
 
         if (!\is_array($imported)) {
             $imported = [$imported];

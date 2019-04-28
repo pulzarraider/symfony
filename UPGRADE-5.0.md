@@ -26,6 +26,7 @@ Config
  * Removed `FileLoaderLoadException`, use `LoaderLoadException` instead.
  * Using environment variables with `cannotBeEmpty()` if the value is validated with `validate()` will throw an exception.
  * Removed the `root()` method in `TreeBuilder`, pass the root node information to the constructor instead
+ * The 3rd `boolean` argument `$ignoreErrors` in `import` method  in `FileLoader` was changed to `int` `$errorLevel`. Use `LoaderInterface::ERROR_LEVEL_IGNORE_ALL` instead of `true`. Use `LoaderInterface::ERROR_LEVEL_ALL` instead of `false`. 
 
 Console
 -------

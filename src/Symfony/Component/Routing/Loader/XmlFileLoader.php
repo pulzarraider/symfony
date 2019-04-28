@@ -12,6 +12,7 @@
 namespace Symfony\Component\Routing\Loader;
 
 use Symfony\Component\Config\Loader\FileLoader;
+use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\Config\Util\XmlUtils;
 use Symfony\Component\Routing\Route;
@@ -169,7 +170,7 @@ class XmlFileLoader extends FileLoader
         $this->setCurrentDir(\dirname($path));
 
         /** @var RouteCollection[] $imported */
-        $imported = $this->import($resource, ('' !== $type ? $type : null), false, $file);
+        $imported = $this->import($resource, ('' !== $type ? $type : null), LoaderInterface::ERROR_LEVEL_ALL, $file);
 
         if (!\is_array($imported)) {
             $imported = [$imported];

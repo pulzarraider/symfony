@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+4.4.0
+-----
+* added option `ignore_not_found` for imported config files
+* deprecated 3rd `boolean` argument `$ignoreErrors` and changed to `int` `$errorLevel` in `import` method  in `FileLoader`.
+
 4.3.0
 -----
 
