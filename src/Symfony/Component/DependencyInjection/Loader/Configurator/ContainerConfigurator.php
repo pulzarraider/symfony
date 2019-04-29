@@ -61,10 +61,10 @@ class ContainerConfigurator extends AbstractConfigurator
         $this->container->loadFromExtension($namespace, static::processValue($config));
     }
 
-    final public function import(string $resource, string $type = null, int $errorLevel = LoaderInterface::ERROR_LEVEL_ALL)
+    final public function import(string $resource, string $type = null, int $ignoreErrors = PhpFileLoader::IGNORE_NONE)
     {
         $this->loader->setCurrentDir(\dirname($this->path));
-        $this->loader->import($resource, $type, $errorLevel, $this->file);
+        $this->loader->import($resource, $type, $ignoreErrors, $this->file);
     }
 
     final public function parameters(): ParametersConfigurator

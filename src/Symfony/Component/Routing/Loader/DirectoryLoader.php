@@ -39,7 +39,7 @@ class DirectoryLoader extends FileLoader
                     $subType = 'directory';
                 }
 
-                $subCollection = $this->import($subPath, $subType, LoaderInterface::ERROR_LEVEL_ALL, $path);
+                $subCollection = $this->import($subPath, $subType, parent::IGNORE_NONE, $path);
                 $collection->addCollection($subCollection);
             }
         }

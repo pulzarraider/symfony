@@ -191,14 +191,15 @@ class YamlFileLoader extends FileLoader
 
             $this->setCurrentDir($defaultDirectory);
 
-            $errorLevel = LoaderInterface::ERROR_LEVEL_ALL;
-            if (isset($import['ignore_errors']) && true === (bool) $import['ignore_errors']) {
-                $errorLevel = LoaderInterface::ERROR_LEVEL_IGNORE_ALL;
-            } elseif (isset($import['ignore_not_found']) && true === (bool) $import['ignore_not_found']) {
-                $errorLevel = $errorLevel & ~LoaderInterface::ERROR_LEVEL_FILE_NOT_FOUND;
+            if (!empty($import['ignore_errors'])) {
+                $ignoreErrors = parent::IGNORE_ALL;
+            } elseif (!empty($import['ignore_not_found'])) {
+                $ignoreErrors = parent::IGNORE_FILE_NOT_FOUND;
+            } else {
+                $ignoreErrors = parent::IGNORE_NONE;
             }
 
-            $this->import($import['resource'], isset($import['type']) ? $import['type'] : null, $errorLevel, $file);
+            $this->import($import['resource'], $import['type'] ?? null, $ignoreErrors, $file);
         }
     }
 

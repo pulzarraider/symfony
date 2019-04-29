@@ -37,7 +37,7 @@ class RoutingConfigurator
     /**
      * @return ImportConfigurator
      */
-    final public function import($resource, $type = null, $errorLevel = LoaderInterface::ERROR_LEVEL_ALL)
+    final public function import($resource, $type = null, int $ignoreErrors = PhpFileLoader::IGNORE_NONE)
     {
         $this->loader->setCurrentDir(\dirname($this->path));
         $imported = $this->loader->import($resource, $type, $errorLevel, $this->file);

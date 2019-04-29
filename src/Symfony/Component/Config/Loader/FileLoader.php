@@ -25,6 +25,10 @@ use Symfony\Component\Config\Resource\GlobResource;
  */
 abstract class FileLoader extends Loader
 {
+    const IGNORE_NONE = 0;
+    const IGNORE_ALL = 1;
+    const IGNORE_FILE_NOT_FOUND = 2;
+
     protected static $loading = [];
 
     protected $locator;
@@ -61,7 +65,7 @@ abstract class FileLoader extends Loader
      *
      * @param mixed       $resource       A Resource
      * @param string|null $type           The resource type or null if unknown
-     * @param int         $errorLevel     Whether to ignore import errors or not
+     * @param int         $ignoreErrors   Whether to ignore import errors or not
      * @param string|null $sourceResource The original resource importing the new resource
      *
      * @return mixed
@@ -70,23 +74,19 @@ abstract class FileLoader extends Loader
      * @throws FileLoaderImportCircularReferenceException
      * @throws FileLocatorFileNotFoundException
      */
-    public function import($resource, $type = null, $errorLevel = LoaderInterface::ERROR_LEVEL_ALL, $sourceResource = null)
+    public function import($resource, $type = null, $ignoreErrors = self::IGNORE_NONE, $sourceResource = null)
     {
-        if (\is_bool($errorLevel)) {
-            @trigger_error('The boolean value you are using for the $errorLevel argument of the '.__CLASS__.'::import method is deprecated since Symfony 4.4 and will not be supported anymore in 5.0. Use the constants defined in the FileLoader instead.', E_USER_DEPRECATED);
+        if (!\is_int($ignoreErrors)) {
+            @trigger_error(sprintf('Passing a boolean to argument "$ignoreErrors" of "%s()" is deprecated since Symfony 4.4, pass an integer instead.', __METHOD__), E_USER_DEPRECATED);
 
-            if (true === $errorLevel) {
-                $errorLevel = LoaderInterface::ERROR_LEVEL_IGNORE_ALL;
-            } elseif (false === $errorLevel) {
-                $errorLevel = LoaderInterface::ERROR_LEVEL_ALL;
-            }
+            $ignoreErrors = $ignoreErrors ? parent::IGNORE_ALL : parent::IGNORE_NONE;
         }
 
         if (\is_string($resource) && \strlen($resource) !== $i = strcspn($resource, '*?{[')) {
             $ret = [];
             $isSubpath = 0 !== $i && false !== strpos(substr($resource, 0, $i), '/');
-            foreach ($this->glob($resource, false, $_, $errorLevel || !$isSubpath) as $path => $info) {
-                if (null !== $res = $this->doImport($path, $type, $errorLevel, $sourceResource)) {
+            foreach ($this->glob($resource, false, $_, $ignoreErrors || !$isSubpath) as $path => $info) {
+                if (null !== $res = $this->doImport($path, $type, $ignoreErrors, $sourceResource)) {
                     $ret[] = $res;
                 }
                 $isSubpath = true;
@@ -97,13 +97,13 @@ abstract class FileLoader extends Loader
             }
         }
 
-        return $this->doImport($resource, $type, $errorLevel, $sourceResource);
+        return $this->doImport($resource, $type, $ignoreErrors, $sourceResource);
     }
 
     /**
      * @internal
      */
-    protected function glob(string $pattern, bool $recursive, &$resource = null, int $errorLevel = LoaderInterface::ERROR_LEVEL_ALL, bool $forExclusion = false, array $excluded = [])
+    protected function glob(string $pattern, bool $recursive, &$resource = null, int $ignoreErrors = self::IGNORE_NONE, bool $forExclusion = false, array $excluded = [])
     {
         if (\strlen($pattern) === $i = strcspn($pattern, '*?{[')) {
             $prefix = $pattern;
@@ -119,7 +119,7 @@ abstract class FileLoader extends Loader
         try {
             $prefix = $this->locator->locate($prefix, $this->currentDir, true);
         } catch (FileLocatorFileNotFoundException $e) {
-            if ($errorLevel & LoaderInterface::ERROR_LEVEL_FILE_NOT_FOUND) {
+            if (self::IGNORE_ALL !== $ignoreErrors) {
                 throw $e;
             }
 
@@ -135,7 +135,7 @@ abstract class FileLoader extends Loader
         yield from $resource;
     }
 
-    private function doImport($resource, $type = null, int $errorLevel = LoaderInterface::ERROR_LEVEL_ALL, $sourceResource = null)
+    private function doImport($resource, $type = null, int $ignoreErrors, $sourceResource)
     {
         try {
             $loader = $this->resolve($resource, $type);
@@ -167,9 +167,8 @@ abstract class FileLoader extends Loader
         } catch (FileLoaderImportCircularReferenceException $e) {
             throw $e;
         } catch (\Exception $e) {
-            if (LoaderInterface::ERROR_LEVEL_IGNORE_ALL !== $errorLevel) {
-                if (0 === ($errorLevel & LoaderInterface::ERROR_LEVEL_FILE_NOT_FOUND) && ($e instanceof FileLocatorFileNotFoundException)) {
-                    // ignore exception if file was not found
+            if (self::IGNORE_ALL !== $ignoreErrors) {
+                if ($e instanceof FileLocatorFileNotFoundException && self::IGNORE_FILE_NOT_FOUND === $ignoreErrors) {
                     return;
                 }
 

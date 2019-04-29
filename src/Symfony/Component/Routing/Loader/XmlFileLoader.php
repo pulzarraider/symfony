@@ -170,7 +170,7 @@ class XmlFileLoader extends FileLoader
         $this->setCurrentDir(\dirname($path));
 
         /** @var RouteCollection[] $imported */
-        $imported = $this->import($resource, ('' !== $type ? $type : null), LoaderInterface::ERROR_LEVEL_ALL, $file);
+        $imported = $this->import($resource, ('' !== $type ? $type : null), parent::IGNORE_NONE, $file);
 
         if (!\is_array($imported)) {
             $imported = [$imported];

@@ -11,7 +11,6 @@
 
 namespace Symfony\Component\DependencyInjection\Loader;
 
-use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\Config\Util\XmlUtils;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\Argument\BoundArgument;
@@ -118,14 +117,15 @@ class XmlFileLoader extends FileLoader
         foreach ($imports as $import) {
             $this->setCurrentDir($defaultDirectory);
 
-            $errorLevel = LoaderInterface::ERROR_LEVEL_ALL;
-            if (true === (bool) XmlUtils::phpize($import->getAttribute('ignore-errors'))) {
-                $errorLevel = LoaderInterface::ERROR_LEVEL_IGNORE_ALL;
-            } elseif (true === (bool) XmlUtils::phpize($import->getAttribute('ignore-not-found'))) {
-                $errorLevel = $errorLevel & ~LoaderInterface::ERROR_LEVEL_FILE_NOT_FOUND;
+            if (XmlUtils::phpize($import->getAttribute('ignore-errors'))) {
+                $ignoreErrors = parent::IGNORE_ALL;
+            } elseif (XmlUtils::phpize($import->getAttribute('ignore-not-found'))) {
+                $ignoreErrors = parent::IGNORE_FILE_NOT_FOUND;
+            } else {
+                $ignoreErrors = parent::IGNORE_NONE;
             }
 
-            $this->import($import->getAttribute('resource'), XmlUtils::phpize($import->getAttribute('type')) ?: null, $errorLevel, $file);
+            $this->import($import->getAttribute('resource'), XmlUtils::phpize($import->getAttribute('type')) ?: null, $ignoreErrors, $file);
         }
     }
 

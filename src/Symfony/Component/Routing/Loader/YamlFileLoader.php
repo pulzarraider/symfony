@@ -188,7 +188,7 @@ class YamlFileLoader extends FileLoader
 
         $this->setCurrentDir(\dirname($path));
 
-        $imported = $this->import($config['resource'], $type, LoaderInterface::ERROR_LEVEL_ALL, $file);
+        $imported = $this->import($config['resource'], $type, parent::IGNORE_NONE, $file);
 
         if (!\is_array($imported)) {
             $imported = [$imported];
